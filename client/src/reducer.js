@@ -15,6 +15,20 @@ export default function reducer(state, { type, payload }) {
         ...state,
         isAuth: payload
       };
+    case 'SIGNOUT_USER':
+      return {
+        ...state,
+        currentUser: null,
+        isAuth: false
+      };
+    case 'CREATE_DRAFT_PIN':
+      return {
+        ...state,
+        draftPin: {
+          latitude: 0,
+          longitude: 0
+        }
+      };
     default:
       return state;
   }

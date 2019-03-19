@@ -6,6 +6,7 @@ import MapIcon from '@material-ui/icons/Map';
 import Typography from '@material-ui/core/Typography';
 
 import Context from '../context';
+import Signout from './Auth/Signout';
 
 const Header = ({ classes }) => {
   const { state } = useContext(Context);
@@ -18,7 +19,7 @@ const Header = ({ classes }) => {
           {/* Logo / Title */}
           <div className={classes.grow}>
             <MapIcon className={classes.icon} />
-            <Typography component='h1' variant='h6' color='inherit' nowrap>
+            <Typography component='h1' variant='h6' color='inherit' noWrap>
               GeoPins
             </Typography>
           </div>
@@ -36,6 +37,8 @@ const Header = ({ classes }) => {
             </div>
           )}
         </Toolbar>
+        {/* Signout Button */}
+        <Signout />
       </AppBar>
     </div>
   );
