@@ -1,13 +1,15 @@
-const user = {
-  name: 'adad',
-  email: 'user',
-  _id: '1211411231'
-}
+const { AuthenticationError } = require('apollo-server');
+
+const authenticated = next => (parent, args, ctx, info) => {
+  if (!ctx.currentUser) {
+    throw new AuthenticationError('You must be logged in!');
+  }
+  //proceed with the resolver
+  return next(parent, args, ctx, info);
+};
 
 module.exports = {
   Query: {
-    me(){
-      return user
-    }
+    me: authenticated((parent, args, ctx, info) => ctx.currentUser)
   }
-}
+};

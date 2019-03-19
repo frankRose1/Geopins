@@ -1,8 +1,10 @@
 const { ApolloServer } = require('apollo-server');
 const mongoose = require('mongoose');
-const typedefs = require('./typeDefs');
-const resolvers = require('./resolvers');
 require('dotenv').config('.env');
+
+const typeDefs = require('./typeDefs');
+const resolvers = require('./resolvers');
+const { findOrCreateUser } = require('./controllers/userController');
 
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true })
@@ -10,8 +12,23 @@ mongoose
   .catch(err => console.error(`DB Error: ${err}`));
 
 const server = new ApolloServer({
-  typedefs,
-  resolvers
+  typeDefs,
+  resolvers,
+  // intercept the request
+  context: ({ req }) => {
+    let authToken = null;
+    let currentUser = null;
+
+    try {
+      authToken = req.headers.authorization;
+      if (authToken) {
+        currentUser = findOrCreateUser(authToken);
+      }
+    } catch (err) {
+      console.error(`Unable to authenticate user with the token ${authToken}`);
+    }
+    return { currentUser };
+  }
 });
 
 server.listen().then(({ url }) => console.log(`Server is listening on ${url}`));
