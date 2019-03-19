@@ -1,0 +1,21 @@
+/**
+ * Reducer will update the state according to action type
+ * @param {object} state - state of the application, provided via context
+ * @param {object} action - action to perform in order to update state, must have a "type" key
+ */
+export default function reducer(state, { type, payload }) {
+  switch (type) {
+    case 'LOGIN_USER':
+      return {
+        ...state,
+        currentUser: payload
+      };
+    case 'IS_LOGGED_IN':
+      return {
+        ...state,
+        isAuth: payload
+      };
+    default:
+      return state;
+  }
+}
