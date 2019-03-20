@@ -5,6 +5,7 @@ import ReactMapGL, { NavigationControl, Marker } from 'react-map-gl';
 // import Typography from "@material-ui/core/Typography";
 // import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
 import PinIcon from './PinIcon';
+import Blog from './Blog';
 import Context from '../context';
 import { MAPBOX_TOKEN } from '../config';
 
@@ -38,13 +39,17 @@ const Map = ({ classes }) => {
 
   /**
    * Handles the placment of a draft pin. Will only pin the draft if a user clicks
-   * with the left mouse button.
+   * with the left mouse button. Thr draft pins location is managed in context, and a marker
+   * is placed on the map when a user clicks.
    */
   const handleMapClick = ({ lngLat, leftButton }) => {
     if (!leftButton) return;
     if (!state.draftPin) {
       dispatch({ type: 'CREATE_DRAFT_PIN' });
     }
+    const [longitude, latitude] = lngLat;
+    const payload = { longitude, latitude };
+    dispatch({ type: 'UPDATE_DRAFT_LOCATION', payload });
   };
 
   return (
@@ -76,7 +81,22 @@ const Map = ({ classes }) => {
             <PinIcon size='40px' color='red' />
           </Marker>
         )}
+
+        {/* Draft Pin */}
+        {state.draftPin && (
+          <Marker
+            latitude={state.draftPin.latitude}
+            longitude={state.draftPin.longitude}
+            offsetLeft={-19}
+            offsetTop={-37}
+          >
+            <PinIcon size='40px' color='hotpink' />
+          </Marker>
+        )}
       </ReactMapGL>
+
+      {/* Blog and Pin Content */}
+      <Blog />
     </div>
   );
 };
