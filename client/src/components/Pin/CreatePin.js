@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import { GraphQLClient } from 'graphql-request';
 import axios from 'axios';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -10,6 +9,7 @@ import LandscapeIcon from '@material-ui/icons/LandscapeOutlined';
 import ClearIcon from '@material-ui/icons/Clear';
 import SaveIcon from '@material-ui/icons/SaveTwoTone';
 import Context from '../../context';
+import { useClient } from '../../client';
 import { CREATE_PIN_MUTATION } from '../../graphql/mutations';
 import { CLOUDINARY_KEY, SERVER_URL } from '../../config';
 
@@ -19,6 +19,7 @@ const CreatePin = ({ classes }) => {
   const [content, setContent] = useState('');
   const [image, setImage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [client] = useClient();
 
   /**
    * Sets title, image, and content back to initial state and removes the draft pin
@@ -48,14 +49,7 @@ const CreatePin = ({ classes }) => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const idToken = window.gapi.auth2
-      .getAuthInstance()
-      .currentUser.get()
-      .getAuthResponse().id_token;
     const imageUrl = await handleImageUpload();
-    const client = new GraphQLClient(SERVER_URL, {
-      headers: { authorization: idToken }
-    });
     const variables = {
       title,
       content,
@@ -63,7 +57,17 @@ const CreatePin = ({ classes }) => {
       latitude: state.draftPin.latitude,
       longitude: state.draftPint.longitude
     };
-    const { createPin } = await client.request(CREATE_PIN_MUTATION, variables);
+    try {
+      setSubmitting(true);
+      const { createPin } = await client.request(
+        CREATE_PIN_MUTATION,
+        variables
+      );
+    } catch (err) {
+      setSubmitting(false);
+      console.error('Error creating pin', err);
+    }
+    setSubmitting(false);
     handleDeleteDraft();
   };
 
@@ -136,7 +140,7 @@ const CreatePin = ({ classes }) => {
           disabled={!title.trim() || !image || !content.trim() || submitting}
           onClick={handleSubmit}
         >
-          Submit
+          Submit{submitting ? 'ting' : ''}
           <SaveIcon className={classes.rightIcon} />
         </Button>
       </div>
