@@ -11,7 +11,13 @@ const authenticated = next => (parent, args, ctx, info) => {
 
 module.exports = {
   Query: {
-    me: authenticated((parent, args, ctx, info) => ctx.currentUser)
+    me: authenticated((parent, args, ctx, info) => ctx.currentUser),
+    getPins: async (parent, args, ctx, info) => {
+      const pins = await Pin.find()
+        .populate('author')
+        .populate('comments.author');
+      return pins;
+    }
   },
   Mutation: {
     createPin: authenticated(async (parent, args, ctx, info) => {
@@ -22,6 +28,14 @@ module.exports = {
       await newPin.save();
       const pinAdded = await Pin.populate(newPin, 'author');
       return pinAdded;
+    }),
+    deletePin: authenticated(async (parent, args, ctx, info) => {
+      const pin = await Pin.findByIdAndDelete(args.pinId);
+      if (!pin) {
+        throw new Error('Pin not found.');
+      }
+
+      return pin;
     })
   }
 };

@@ -22,4 +22,12 @@ const CREATE_PIN_MUTATION = `
   }
 `;
 
-export { CREATE_PIN_MUTATION };
+const DELETE_PIN_MUTATION = `
+  mutation($pinId: ID!){
+    deletePin(pinId: $pinId) {
+      _id
+    }
+  }
+`;
+
+export { CREATE_PIN_MUTATION, DELETE_PIN_MUTATION };

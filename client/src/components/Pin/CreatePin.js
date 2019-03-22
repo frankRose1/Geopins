@@ -11,7 +11,7 @@ import SaveIcon from '@material-ui/icons/SaveTwoTone';
 import Context from '../../context';
 import { useClient } from '../../client';
 import { CREATE_PIN_MUTATION } from '../../graphql/mutations';
-import { CLOUDINARY_KEY, SERVER_URL } from '../../config';
+import { CLOUDINARY_KEY } from '../../config';
 
 const CreatePin = ({ classes }) => {
   const { dispatch, state } = useContext(Context);
@@ -47,6 +47,10 @@ const CreatePin = ({ classes }) => {
     return res.data.url;
   };
 
+  /**
+   * Submits the pin data to the server and will update the "pins" in context
+   * with the newly created pin so that it appears on the map immediately
+   */
   const handleSubmit = async e => {
     e.preventDefault();
     const imageUrl = await handleImageUpload();
@@ -55,7 +59,7 @@ const CreatePin = ({ classes }) => {
       content,
       image: imageUrl,
       latitude: state.draftPin.latitude,
-      longitude: state.draftPint.longitude
+      longitude: state.draftPin.longitude
     };
     try {
       setSubmitting(true);
@@ -63,6 +67,7 @@ const CreatePin = ({ classes }) => {
         CREATE_PIN_MUTATION,
         variables
       );
+      dispatch({ type: 'CREATE_PIN', payload: createPin });
     } catch (err) {
       setSubmitting(false);
       console.error('Error creating pin', err);

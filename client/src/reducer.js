@@ -24,6 +24,7 @@ export default function reducer(state, { type, payload }) {
     case 'CREATE_DRAFT_PIN':
       return {
         ...state,
+        currentPin: null,
         draftPin: {
           latitude: 0,
           longitude: 0
@@ -39,6 +40,36 @@ export default function reducer(state, { type, payload }) {
     case 'DELETE_DRAFT_PIN':
       return {
         ...state,
+        draftPin: null
+      };
+    case 'GET_PINS':
+      return {
+        ...state,
+        pins: payload
+      };
+    case 'CREATE_PIN':
+      const newPin = payload;
+      const prevPins = state.pins.filter(pin => pin._id !== newPin._id);
+      return {
+        ...state,
+        pins: [...prevPins, { ...newPin }]
+      };
+    case 'DELETE_PIN':
+      const pinToDelete = payload;
+      const filteredPins = state.pins.filter(
+        pin => pin._id !== pinToDelete._id
+      );
+      return {
+        ...state,
+        currentPin: null,
+        pins: filteredPins
+      };
+    case 'SET_CURRENT_PIN':
+      // when a user is selecting a pin they should not be able to create a new pin,
+      //so draft pin will be set to null
+      return {
+        ...state,
+        currentPin: payload,
         draftPin: null
       };
     default:

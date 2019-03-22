@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GrapgQLClient } from 'grapqhl-request';
+import { GraphQLClient } from 'graphql-request';
 import { SERVER_URL } from './config';
 
 export const useClient = () => {
@@ -12,7 +12,7 @@ export const useClient = () => {
     setIdToken(token);
   }, []);
 
-  const _client = new GrapgQLClient(SERVER_URL, {
+  const _client = new GraphQLClient(SERVER_URL, {
     headers: { authorization: idToken }
   });
 
