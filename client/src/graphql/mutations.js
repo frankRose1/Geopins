@@ -30,4 +30,31 @@ const DELETE_PIN_MUTATION = `
   }
 `;
 
-export { CREATE_PIN_MUTATION, DELETE_PIN_MUTATION };
+const CREATE_COMMENT_MUTATION = `
+  mutation($pinId: ID!, $text: String!){
+    createComment(pinId: $pinId, text: $text) {
+      _id
+      title
+      createdAt
+      content
+      image
+      latitude
+      longitude
+      author {
+        _id
+        name
+      }
+      comments {
+        text
+        createdAt
+        _id
+        author {
+          name
+          picture
+        }
+      }
+    }
+  }
+`;
+
+export { CREATE_PIN_MUTATION, DELETE_PIN_MUTATION, CREATE_COMMENT_MUTATION };

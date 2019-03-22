@@ -13,7 +13,7 @@ module.exports = {
   Query: {
     me: authenticated((parent, args, ctx, info) => ctx.currentUser),
     getPins: async (parent, args, ctx, info) => {
-      const pins = await Pin.find()
+      const pins = await Pin.find({})
         .populate('author')
         .populate('comments.author');
       return pins;
@@ -31,6 +31,25 @@ module.exports = {
     }),
     deletePin: authenticated(async (parent, args, ctx, info) => {
       const pin = await Pin.findByIdAndDelete(args.pinId);
+      if (!pin) {
+        throw new Error('Pin not found.');
+      }
+
+      return pin;
+    }),
+    createComment: authenticated(async (parent, args, ctx, info) => {
+      const newComment = {
+        author: ctx.currentUser._id,
+        text: args.text
+      };
+      const pin = await Pin.findByIdAndUpdate(
+        args.pinId,
+        { $push: { comments: newComment } },
+        { new: true }
+      )
+        .populate('author')
+        .populate('comments.author');
+
       if (!pin) {
         throw new Error('Pin not found.');
       }
