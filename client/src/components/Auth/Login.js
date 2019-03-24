@@ -13,6 +13,9 @@ const Login = ({ classes }) => {
 
   const onFailure = err => {
     console.error(`Error logging in: ${err}`);
+    // handles the case when the google access token is expired
+    // state.isAuth will be false and user will be redirected to /login
+    dispatch({ type: 'IS_LOGGED_IN', payload: false });
   };
 
   const onSuccess = async googleUser => {

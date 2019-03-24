@@ -1,5 +1,9 @@
 const Pin = require('./models/Pin');
-const { AuthenticationError } = require('apollo-server');
+const { AuthenticationError, PubSub } = require('apollo-server');
+const pubsub = new PubSub();
+const PIN_ADDED = 'PIN_ADDED';
+const PIN_DELETED = 'PIN_DELETED';
+const PIN_UPDATED = 'PIN_UPDATED';
 
 const authenticated = next => (parent, args, ctx, info) => {
   if (!ctx.currentUser) {
@@ -27,22 +31,23 @@ module.exports = {
       });
       await newPin.save();
       const pinAdded = await Pin.populate(newPin, 'author');
+      pubsub.publish(PIN_ADDED, { pinAdded });
       return pinAdded;
     }),
     deletePin: authenticated(async (parent, args, ctx, info) => {
-      const pin = await Pin.findByIdAndDelete(args.pinId);
-      if (!pin) {
+      const pinDeleted = await Pin.findByIdAndDelete(args.pinId);
+      if (!pinDeleted) {
         throw new Error('Pin not found.');
       }
-
-      return pin;
+      pubsub.publish(PIN_DELETED, { pinDeleted });
+      return pinDeleted;
     }),
     createComment: authenticated(async (parent, args, ctx, info) => {
       const newComment = {
         author: ctx.currentUser._id,
         text: args.text
       };
-      const pin = await Pin.findByIdAndUpdate(
+      const pinUpdated = await Pin.findByIdAndUpdate(
         args.pinId,
         { $push: { comments: newComment } },
         { new: true }
@@ -50,11 +55,22 @@ module.exports = {
         .populate('author')
         .populate('comments.author');
 
-      if (!pin) {
+      if (!pinUpdated) {
         throw new Error('Pin not found.');
       }
-
-      return pin;
+      pubsub.publish(PIN_UPDATED, { pinUpdated });
+      return pinUpdated;
     })
+  },
+  Subscription: {
+    pinAdded: {
+      subscribe: () => pubsub.asyncIterator(PIN_ADDED)
+    },
+    pinDeleted: {
+      subscribe: () => pubsub.asyncIterator(PIN_DELETED)
+    },
+    pinUpdated: {
+      subscribe: () => pubsub.asyncIterator(PIN_UPDATED)
+    }
   }
 };
