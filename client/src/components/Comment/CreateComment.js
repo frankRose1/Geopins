@@ -12,18 +12,14 @@ import { CREATE_COMMENT_MUTATION } from '../../graphql/mutations';
 
 const CreateComment = ({ classes }) => {
   const [client] = useClient();
-  const { state, dispatch } = useContex(Context);
+  const { state } = useContext(Context);
   const [commentText, setCommentText] = useState('');
 
   const handleSubmit = async e => {
     e.preventDefault();
     const variables = { text: commentText, pinId: state.currentPin._id };
     try {
-      const { createComment } = await client.request(
-        CREATE_COMMENT_MUTATION,
-        variables
-      );
-      dispatch({ type: 'CREATE_COMMENT', payload: createComment });
+      await client.request(CREATE_COMMENT_MUTATION, variables);
       setCommentText('');
     } catch (err) {
       console.error('Error creating a comment', err);
@@ -34,7 +30,7 @@ const CreateComment = ({ classes }) => {
     <>
       <form className={classes.form}>
         <IconButton
-          onCLick={() => setCommentText('')}
+          onClick={() => setCommentText('')}
           disabled={!commentText.trim()}
           className={classes.clearButton}
         >

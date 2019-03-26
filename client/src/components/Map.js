@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import ReactMapGL, { NavigationControl, Marker, Popup } from 'react-map-gl';
+import { Subscription } from 'react-apollo';
 import differenceInMinutes from 'date-fns/difference_in_minutes';
+import { unstable_useMediaQuery as useMediaQuery } from '@material-ui/core/useMediaQuery';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import DeleteIcon from '@material-ui/icons/DeleteTwoTone';
@@ -12,6 +14,11 @@ import { GET_PINS_QUERY } from '../graphql/queries';
 import { useClient } from '../client';
 import { MAPBOX_TOKEN } from '../config';
 import { DELETE_PIN_MUTATION } from '../graphql/mutations';
+import {
+  PIN_ADDED_SUBSCRIPTION,
+  PIN_DELETED_SUBSCRIPTION,
+  PIN_UPDATED_SUBSCRIPTION
+} from '../graphql/subscriptions';
 
 const initialViewport = {
   latitude: 37.7577,
@@ -25,6 +32,8 @@ const Map = ({ classes }) => {
   const [viewport, setViewport] = useState(initialViewport);
   const [userPosition, setUserPosition] = useState(null);
   const [popup, setPopup] = useState(null);
+
+  const mobileSize = useMediaQuery('(max-width: 650px)');
 
   // when the component mounts the user's position should be updated
   useEffect(() => {
@@ -53,7 +62,6 @@ const Map = ({ classes }) => {
    */
   const getPins = async () => {
     const { getPins } = await client.request(GET_PINS_QUERY);
-    console.log(getPins);
     dispatch({ type: 'GET_PINS', payload: getPins });
   };
 
@@ -84,31 +92,36 @@ const Map = ({ classes }) => {
 
   /**
    * Handles displaying a pop up when a pin is clicked.
+   * @param {object} e - event object
    * @param {object} pin - pin marker that was clicked on the map
    */
-  const handleSelectPin = pin => {
+  const handleSelectPin = (e, pin) => {
+    e.stopPropagation();
     setPopup(pin);
-    console.log(pin);
     dispatch({ type: 'SET_CURRENT_PIN', payload: pin });
   };
 
   const handleDeletePin = async pin => {
     const variables = { pinId: pin._id };
-    const { deletePin } = await client.request(DELETE_PIN_MUTATION, variables);
-    dispatch({ type: 'DELETE_PIN', payload: deletePin });
+    await client.request(DELETE_PIN_MUTATION, variables);
     setPopup(null);
   };
 
-  const isAuthUser = () => state.CurrentUser._id === popup.author._id;
+  const isAuthUser = () => {
+    console.log(state.currentUser);
+    console.log(popup);
+    return state.currentUser._id === popup.author._id;
+  };
 
   return (
-    <div className={classes.root}>
+    <div className={mobileSize ? classes.rootMobile : classes.root}>
       <ReactMapGL
         width='100vw'
         height='calc(100vh - 64px)'
         mapStyle='mapbox://styles/mapbox/streets-v9'
         onClick={handleMapClick}
         onViewportChange={newViewport => setViewport(newViewport)}
+        scrollZoom={!mobileSize}
         mapboxApiAccessToken={MAPBOX_TOKEN}
         {...viewport}
       >
@@ -153,7 +166,7 @@ const Map = ({ classes }) => {
             offsetTop={-37}
           >
             <PinIcon
-              onClick={() => handleSelectPin(pin)}
+              onClick={e => handleSelectPin(e, pin)}
               size='40px'
               color={highlightNewPin(pin)}
             />
@@ -187,6 +200,31 @@ const Map = ({ classes }) => {
           </div>
         </Popup>
       )}
+
+      {/* Subscriptions for Creating/Updating/Deleting Pins */}
+      <Subscription
+        subscription={PIN_ADDED_SUBSCRIPTION}
+        onSubscriptionData={({ subscriptionData }) => {
+          const { pinAdded } = subscriptionData.data;
+          dispatch({ type: 'CREATE_PIN', payload: pinAdded });
+        }}
+      />
+      <Subscription
+        subscription={PIN_UPDATED_SUBSCRIPTION}
+        onSubscriptionData={({ subscriptionData }) => {
+          const { pinUpdated } = subscriptionData.data;
+          console.log(pinUpdated);
+          dispatch({ type: 'CREATE_COMMENT', payload: pinUpdated });
+        }}
+      />
+      <Subscription
+        subscription={PIN_DELETED_SUBSCRIPTION}
+        onSubscriptionData={({ subscriptionData }) => {
+          const { pinDeleted } = subscriptionData.data;
+          console.log(pinDeleted);
+          dispatch({ type: 'DELETE_PIN', payload: pinDeleted });
+        }}
+      />
 
       {/* Blog and Pin Content */}
       <Blog />

@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import { unstable_useMediaQuery as useMediaQuery } from '@material-ui/core/useMediaQuery';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import MapIcon from '@material-ui/icons/Map';
@@ -11,6 +12,8 @@ import Signout from './Auth/Signout';
 const Header = ({ classes }) => {
   const { state } = useContext(Context);
   const { currentUser } = state;
+  //if screen width is less than 650px
+  const mobileSize = useMediaQuery('(max-width: 650px)');
 
   return (
     <div className={classes.root}>
@@ -19,10 +22,17 @@ const Header = ({ classes }) => {
           {/* Logo / Title */}
           <div className={classes.grow}>
             <MapIcon className={classes.icon} />
-            <Typography component='h1' variant='h6' color='inherit' noWrap>
+            <Typography
+              className={mobileSize ? classes.mobile : ''}
+              component='h1'
+              variant='h6'
+              color='inherit'
+              noWrap
+            >
               GeoPins
             </Typography>
           </div>
+
           {/* User Info */}
           {currentUser && (
             <div className={classes.grow}>
@@ -31,14 +41,20 @@ const Header = ({ classes }) => {
                 src={currentUser.picture}
                 alt={currentUser.name}
               />
-              <Typography variant='h5' color='inherit' noWrap>
+              <Typography
+                className={mobileSize ? classes.mobile : ''}
+                variant='h5'
+                color='inherit'
+                noWrap
+              >
                 {currentUser.name}
               </Typography>
             </div>
           )}
+
+          {/* Signout Button */}
+          <Signout />
         </Toolbar>
-        {/* Signout Button */}
-        <Signout />
       </AppBar>
     </div>
   );

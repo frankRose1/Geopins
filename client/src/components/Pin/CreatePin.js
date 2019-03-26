@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { withStyles } from '@material-ui/core/styles';
+import { unstable_useMediaQuery as useMediaQuery } from '@material-ui/core/useMediaQuery';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -20,6 +21,7 @@ const CreatePin = ({ classes }) => {
   const [image, setImage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [client] = useClient();
+  const mobileSize = useMediaQuery('(max-width: 650px)');
 
   /**
    * Sets title, image, and content back to initial state and removes the draft pin
@@ -63,17 +65,13 @@ const CreatePin = ({ classes }) => {
     };
     try {
       setSubmitting(true);
-      const { createPin } = await client.request(
-        CREATE_PIN_MUTATION,
-        variables
-      );
-      dispatch({ type: 'CREATE_PIN', payload: createPin });
+      await client.request(CREATE_PIN_MUTATION, variables);
+      handleDeleteDraft();
     } catch (err) {
       setSubmitting(false);
       console.error('Error creating pin', err);
     }
     setSubmitting(false);
-    handleDeleteDraft();
   };
 
   return (
@@ -121,7 +119,7 @@ const CreatePin = ({ classes }) => {
           multiline
           fullWidth
           margin='normal'
-          rows='6'
+          rows={mobileSize ? '3' : '6'}
           variant='outlined'
           onChange={e => setContent(e.target.value)}
         />

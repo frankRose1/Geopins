@@ -10,7 +10,7 @@ import CreateComment from '../Comment/CreateComment';
 import Context from '../../context';
 
 const PinContent = ({ classes }) => {
-  const { state, dispatch } = useContext(Context);
+  const { state } = useContext(Context);
   const { title, content, author, createdAt, comments } = state.currentPin;
   return (
     <div className={classes.root}>

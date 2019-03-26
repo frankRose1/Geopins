@@ -15,6 +15,7 @@ const CREATE_PIN_MUTATION = `
       latitude
       longitude
       author {
+        _id
         name
         picture
       }

@@ -14,6 +14,10 @@ import { ApolloProvider } from 'react-apollo';
 import { ApolloClient } from 'apollo-client';
 import { WebSocketLink } from 'apollo-link-ws';
 import { InMemoryCache } from 'apollo-cache-inmemory';
+
+import 'mapbox-gl/dist/mapbox-gl.css';
+import * as serviceWorker from './serviceWorker';
+
 const wsLink = new WebSocketLink({
   uri: WEB_SOCKET_URI,
   options: {
@@ -24,9 +28,6 @@ const client = new ApolloClient({
   link: wsLink,
   cache: new InMemoryCache()
 });
-
-import 'mapbox-gl/dist/mapbox-gl.css';
-import * as serviceWorker from './serviceWorker';
 
 const Root = () => {
   const initialState = useContext(Context);
