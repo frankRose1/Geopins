@@ -52,7 +52,6 @@ const Login = ({ classes }) => {
         isSignedIn={true}
         theme='dark'
       />
-      ;
     </div>
   );
 };
