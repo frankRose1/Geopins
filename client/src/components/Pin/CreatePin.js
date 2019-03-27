@@ -66,12 +66,12 @@ const CreatePin = ({ classes }) => {
     try {
       setSubmitting(true);
       await client.request(CREATE_PIN_MUTATION, variables);
+      setSubmitting(false);
       handleDeleteDraft();
     } catch (err) {
       setSubmitting(false);
       console.error('Error creating pin', err);
     }
-    setSubmitting(false);
   };
 
   return (

@@ -29,16 +29,26 @@ const initialViewport = {
 const Map = ({ classes }) => {
   const { state, dispatch } = useContext(Context);
   const [client] = useClient();
+  const mobileSize = useMediaQuery('(max-width: 650px)');
   const [viewport, setViewport] = useState(initialViewport);
   const [userPosition, setUserPosition] = useState(null);
-  const [popup, setPopup] = useState(null);
 
-  const mobileSize = useMediaQuery('(max-width: 650px)');
+  // if user deletes a pin, must also delete the popup so that it updates on another user's ui
+  //if length of pins changes
+  useEffect(() => {
+    const pinExists =
+      popup && state.pins.findIndex(pin => pin._id === popup._id) > -1;
+    if (!pinExists) {
+      setPopup(null);
+    }
+  }, [state.pins.length]);
 
   // when the component mounts the user's position should be updated
   useEffect(() => {
     getUserPosition();
   }, []);
+
+  const [popup, setPopup] = useState(null);
 
   useEffect(() => {
     getPins();
@@ -92,11 +102,9 @@ const Map = ({ classes }) => {
 
   /**
    * Handles displaying a pop up when a pin is clicked.
-   * @param {object} e - event object
    * @param {object} pin - pin marker that was clicked on the map
    */
-  const handleSelectPin = (e, pin) => {
-    e.stopPropagation();
+  const handleSelectPin = pin => {
     setPopup(pin);
     dispatch({ type: 'SET_CURRENT_PIN', payload: pin });
   };
@@ -108,8 +116,6 @@ const Map = ({ classes }) => {
   };
 
   const isAuthUser = () => {
-    console.log(state.currentUser);
-    console.log(popup);
     return state.currentUser._id === popup.author._id;
   };
 
@@ -166,40 +172,40 @@ const Map = ({ classes }) => {
             offsetTop={-37}
           >
             <PinIcon
-              onClick={e => handleSelectPin(e, pin)}
+              onClick={() => handleSelectPin(pin)}
               size='40px'
               color={highlightNewPin(pin)}
             />
           </Marker>
         ))}
-      </ReactMapGL>
 
-      {/* Popup dialog for a selected pin */}
-      {popup && (
-        <Popup
-          anchor='top'
-          latitude={popup.latitude}
-          longitude={popup.longitude}
-          closeOnClick={false}
-          onClose={() => setPopup(null)}
-        >
-          <img
-            className={classes.popupImage}
-            src={popup.image}
-            alt={popup.title}
-          />
-          <div className={classes.popupTab}>
-            <Typography>
-              {popup.latitude.toFixed(6)}, {popup.longitude.toFixed(6)}
-            </Typography>
-            {isAuthUser() && (
-              <Button onClick={() => handleDeletePin(popup)}>
-                <DeleteIcon className={classes.deleteIcon} />
-              </Button>
-            )}
-          </div>
-        </Popup>
-      )}
+        {/* Popup dialog for a selected pin */}
+        {popup && (
+          <Popup
+            anchor='top'
+            latitude={popup.latitude}
+            longitude={popup.longitude}
+            closeOnClick={false}
+            onClose={() => setPopup(null)}
+          >
+            <img
+              className={classes.popupImage}
+              src={popup.image}
+              alt={popup.title}
+            />
+            <div className={classes.popupTab}>
+              <Typography>
+                {popup.latitude.toFixed(6)}, {popup.longitude.toFixed(6)}
+              </Typography>
+              {isAuthUser() && (
+                <Button onClick={() => handleDeletePin(popup)}>
+                  <DeleteIcon className={classes.deleteIcon} />
+                </Button>
+              )}
+            </div>
+          </Popup>
+        )}
+      </ReactMapGL>
 
       {/* Subscriptions for Creating/Updating/Deleting Pins */}
       <Subscription

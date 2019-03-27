@@ -59,9 +59,19 @@ export default function reducer(state, { type, payload }) {
       const filteredPins = state.pins.filter(
         pin => pin._id !== pinToDelete._id
       );
+      // if a user deletes a pin, it will set other user's currentPin to null without this conditional
+      if (state.currentPin) {
+        const isCurrentPin = pinToDelete._id === state.currentPin._id;
+        if (isCurrentPin) {
+          return {
+            ...state,
+            currentPin: null,
+            pins: filteredPins
+          };
+        }
+      }
       return {
         ...state,
-        currentPin: null,
         pins: filteredPins
       };
     case 'SET_CURRENT_PIN':

@@ -35,7 +35,7 @@ module.exports = {
       return pinAdded;
     }),
     deletePin: authenticated(async (parent, args, ctx, info) => {
-      const pinDeleted = await Pin.findByIdAndDelete(args.pinId);
+      const pinDeleted = await Pin.findOneAndDelete({ _id: args.pinId });
       if (!pinDeleted) {
         throw new Error('Pin not found.');
       }
@@ -47,8 +47,8 @@ module.exports = {
         author: ctx.currentUser._id,
         text: args.text
       };
-      const pinUpdated = await Pin.findByIdAndUpdate(
-        args.pinId,
+      const pinUpdated = await Pin.findOneAndUpdate(
+        { _id: args.pinId },
         { $push: { comments: newComment } },
         { new: true }
       )

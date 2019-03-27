@@ -10,8 +10,8 @@ import Typography from '@material-ui/core/Typography';
 
 const Comments = ({ classes, comments }) => (
   <List className={classes.root}>
-    {comments.map(comment => (
-      <ListItem key={comment._id} alignItems='flex-start'>
+    {comments.map((comment, i) => (
+      <ListItem key={i} alignItems='flex-start'>
         <ListItemAvatar>
           <Avatar src={comment.author.picture} alt={comment.author.name} />
         </ListItemAvatar>

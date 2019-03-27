@@ -28,7 +28,7 @@ const PinContent = ({ classes }) => {
         {author.name}
       </Typography>
       <Typography
-        component='subtitle2'
+        variant='subtitle2'
         color='inherit'
         gutterBottom
         className={classes.text}
@@ -36,7 +36,7 @@ const PinContent = ({ classes }) => {
         <AccessTimeIcon className={classes.text} />
         {format(Number(createdAt), 'MMM Do, YYYY')}
       </Typography>
-      <Typography component='subtitle1' gutterBottom className={classes.text}>
+      <Typography variant='subtitle1' gutterBottom className={classes.text}>
         {content}
       </Typography>
 
